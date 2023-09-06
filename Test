@@ -1,0 +1,217 @@
+#include <stdio.h>
+#include <string.h>
+
+struct Film {
+    char title[100];
+    char director[100];
+    int year;
+    float rating;
+    int tickets_available;
+};
+
+struct OrderHistory {
+    char username[50];
+    char film_title[100];
+    int num_tickets;
+};
+
+struct User {
+    char username[50];
+    char password[50];
+    int logged_in; 
+};
+
+struct Film films[10];
+struct OrderHistory orderHistory[100];
+struct User users[10];
+int numFilms = 0;
+int numOrders = 0;
+int numUsers = 0;
+int current_user = -1; 
+
+void displayFilms() 
+{
+    printf("Список фільмів:\n");
+    for (int i = 0; i < numFilms; i++) 
+    {
+        printf("Назва: %s\n", films[i].title);
+        printf("Режисер: %s\n", films[i].director);
+        printf("Рік випуску: %d\n", films[i].year);
+        printf("Рейтинг: %.2f\n", films[i].rating);
+        printf("Квитків доступно: %d\n", films[i].tickets_available);
+        printf("\n");
+    }
+}
+
+void addUser() 
+{
+    if (numUsers < 10) 
+    {
+        struct User newUser;
+        printf("Введіть ім'я користувача: ");
+        scanf("%s", newUser.username);
+        printf("Введіть пароль: ");
+        scanf("%s", newUser.password);
+        newUser.logged_in = 0;
+        users[numUsers] = newUser;
+        numUsers++;
+        printf("Користувач успішно зареєстрований!\n");
+    } 
+    else 
+    {
+        printf("Ви досягли максимальної кількості користувачів.\n");
+    }
+}
+
+void login() 
+{
+    printf("Введіть ім'я користувача: ");
+    char input_username[50];
+    scanf("%s", input_username);
+
+    printf("Введіть пароль: ");
+    char input_password[50];
+    scanf("%s", input_password);
+
+    for (int i = 0; i < numUsers; i++) 
+    {
+        if (strcmp(input_username, users[i].username) == 0 && strcmp(input_password, users[i].password) == 0) 
+        {
+            users[i].logged_in = 1;
+            current_user = i;
+            printf("Ви увійшли в систему як %s.\n", users[i].username);
+            return;
+        }
+    }
+
+    printf("Невірне ім'я користувача або пароль.\n");
+}
+
+void logout() 
+{
+    if (current_user != -1) 
+    {
+        users[current_user].logged_in = 0; 
+        current_user = -1; 
+        printf("Ви вийшли з системи.\n");
+    } 
+    else 
+    {
+        printf("Ви не увійшли в систему.\n");
+    }
+}
+
+void makeOrder() 
+{
+    if (current_user == -1) 
+    {
+        printf("Спершу увійдіть в систему.\n");
+        return;
+    }
+
+    if (numFilms == 0) 
+    {
+        printf("Наразі немає фільмів для замовлення.\n");
+        return;
+    }
+
+    printf("Доступні фільми для замовлення:\n");
+    for (int i = 0; i < numFilms; i++) 
+    {
+        printf("%d. %s\n", i + 1, films[i].title);
+    }
+
+    int filmChoice;
+    printf("Виберіть фільм за номером: ");
+    scanf("%d", &filmChoice);
+    filmChoice--;
+
+    if (filmChoice < 0 || filmChoice >= numFilms) 
+    {
+        printf("Невірний вибір фільму.\n");
+        return;
+    }
+
+    int numTickets;
+    printf("Введіть кількість квитків: ");
+    scanf("%d", &numTickets);
+
+    if (numTickets <= 0 || numTickets > films[filmChoice].tickets_available) 
+    {
+        printf("Невірна кількість квитків або квитків недостатньо.\n");
+        return;
+    }
+
+    struct OrderHistory newOrder;
+    strcpy(newOrder.username, users[current_user].username); 
+    strcpy(newOrder.film_title, films[filmChoice].title);
+    newOrder.num_tickets = numTickets;
+
+    orderHistory[numOrders] = newOrder;
+    numOrders++;
+    films[filmChoice].tickets_available -= numTickets;
+
+    if (films[filmChoice].tickets_available == 0) 
+    {
+        // Якщо квитки закінчилися, фільм видаляється зі списку
+        for (int i = filmChoice; i < numFilms - 1; i++) 
+        {
+            films[i] = films[i + 1];
+        }
+        numFilms--;
+    }
+
+    printf("Замовлення успішно оформлене!\n");
+}
+
+int main() 
+{
+    struct Film film1 = {"Пірати карибського моря: Прокляття чорної перлини", "Гор Вербінскі", 2003, 8.0, 100};
+    struct Film film2 = {"Міцний горішок", "Джон МакТірнан", 1988, 8.2, 75};
+    struct Film film3 = {"Ілюзіоніст", "Ніл Бергер", 2006, 7.6, 90};
+    struct Film film4 = {"Кіт у чоботях 2", "Джоел Кроуфорд", 2022, 7.9, 100};
+
+    films[numFilms++] = film1;
+    films[numFilms++] = film2;
+    films[numFilms++] = film3;
+    films[numFilms++] = film4;
+    int choice;
+
+    do 
+    {
+        printf("Меню:\n");
+        printf("1. Показати фільми\n");
+        printf("2. Зареєструватися\n");
+        printf("3. Увійти\n"); 
+        printf("4. Вийти із аккаунта\n"); 
+        printf("5. Замовити квитки\n");
+        printf("6. Вихід\n");
+        printf("Виберіть опцію: ");
+        scanf("%d", &choice);
+        switch (choice) 
+        {
+            case 1:
+                displayFilms();
+                break;
+            case 2:
+                addUser();
+                break;
+            case 3:
+                login();
+                break;
+            case 4:
+                logout();
+                break;
+            case 5:
+                makeOrder();
+                break;
+            case 6:
+                printf("Дякуємо за користування сервісом!\n");
+                break;
+            default:
+                printf("Невірний вибір, спробуйте ще раз.\n");
+        }
+    } while (choice != 6);
+
+    return 0;
+}
