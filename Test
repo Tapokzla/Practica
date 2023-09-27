@@ -153,7 +153,6 @@ void makeOrder()
 
     if (films[filmChoice].tickets_available == 0) 
     {
-        // Якщо квитки закінчилися, фільм видаляється зі списку
         for (int i = filmChoice; i < numFilms - 1; i++) 
         {
             films[i] = films[i + 1];
@@ -206,10 +205,10 @@ int main()
                 makeOrder();
                 break;
             case 6:
-                printf("Дякуємо за користування сервісом!\n");
+                printf("\n");
                 break;
             default:
-                printf("Невірний вибір, спробуйте ще раз.\n");
+                printf("Невірний вибір\n");
         }
     } while (choice != 6);
 
